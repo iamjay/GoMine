@@ -9,6 +9,6 @@ import (
 func main() {
     log.Printf("GoMine version 0.1\n")
 
-    s := server.Server{}
+    s := server.New()
     s.Serve()
 }

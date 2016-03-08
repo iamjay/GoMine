@@ -1,19 +1,25 @@
 package server
 
 import (
-    "encoding/hex"
     "log"
     "net"
+
+    "bitbucket.org/pathompong/gomine/server/handlers"
 )
 
 type Server struct {
 }
 
-func (self *Server) handle(remote *net.UDPAddr, buf []byte, byteCount int) {
-    log.Printf("%s\n", hex.Dump(buf))
+func New() *Server {
+    return &Server {
+    }
 }
 
-func (self *Server) Serve() error {
+func (s *Server) handle(remote *net.UDPAddr, buf []byte, byteCount int) {
+    handlers.Handle(remote, buf, byteCount)
+}
+
+func (s *Server) Serve() error {
 	log.Print("GoMine server is serving")
 
     addr, err := net.ResolveUDPAddr("udp", ":19132")
@@ -31,7 +37,7 @@ func (self *Server) Serve() error {
         buf := make([]byte, 1024)
         byteCount, remoteAddr, err := conn.ReadFromUDP(buf)
         if err == nil {
-            self.handle(remoteAddr, buf, byteCount)
+            go s.handle(remoteAddr, buf, byteCount)
         }
     }
 
