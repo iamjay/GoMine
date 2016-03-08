@@ -14,7 +14,7 @@ func init() {
     registerHandler(loginHandlers)
 }
 
-func login(remote *net.UDPAddr, buf []byte, byteCount int) error {
+func login(remote *net.UDPAddr, buf []byte) error {
     log.Printf("login:\n%s\n", hex.Dump(buf))
 
     return nil

@@ -10,5 +10,7 @@ func main() {
     log.Printf("GoMine version 0.1\n")
 
     s := server.New()
-    s.Serve()
+    if err := s.Serve(); err != nil {
+        log.Printf("%s\n", err)
+    }
 }

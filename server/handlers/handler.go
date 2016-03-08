@@ -6,13 +6,13 @@ import (
     "net"
 )
 
-type handleFunc func(remote *net.UDPAddr, buf []byte, byteCount int) error
+type handleFunc func(remote *net.UDPAddr, buf []byte) error
 
 var handlers = map[byte]handleFunc{}
 
-func Handle(remote *net.UDPAddr, buf []byte, byteCount int) error {
+func Handle(remote *net.UDPAddr, buf []byte) error {
     if handler, ok := handlers[buf[0]]; ok {
-        return handler(remote, buf, byteCount)
+        return handler(remote, buf)
     }
 
     log.Printf("%x:\n%s\n", buf[0], hex.Dump(buf))
