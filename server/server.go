@@ -20,7 +20,7 @@ func New() *Server {
 }
 
 func (s *Server) processPacket(remote *net.UDPAddr, buf []byte) {
-    handlers.Handle(remote, buf, byteCount)
+    handlers.Handle(remote, buf)
 }
 
 func (s *Server) Serve() error {
