@@ -3,7 +3,8 @@ package handlers
 import (
     "encoding/hex"
     "log"
-    "net"
+
+    "bitbucket.org/pathompong/gomine/session"
 )
 
 var loginHandlers = map[byte]handleFunc{
@@ -14,7 +15,7 @@ func init() {
     registerHandler(loginHandlers)
 }
 
-func login(remote *net.UDPAddr, buf []byte) error {
+func login(sess *session.Session, buf []byte) error {
     log.Printf("login:\n%s\n", hex.Dump(buf))
 
     return nil

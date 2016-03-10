@@ -5,22 +5,31 @@ import (
     "net"
 
     "bitbucket.org/pathompong/gomine/handlers"
+    "bitbucket.org/pathompong/gomine/session"
 )
 
 type Server struct {
     conn *net.UDPConn
     exited chan bool
-    sessions map[string]*session
+    sessions map[string]*session.Session
 }
 
 func New() *Server {
     return &Server {
         exited: make(chan bool),
+        sessions: make(map[string]*session.Session),
     }
 }
 
 func (s *Server) processPacket(remote *net.UDPAddr, buf []byte) {
-    handlers.Handle(remote, buf)
+    sess, ok := s.sessions[remote.String()]
+    if !ok {
+        log.Printf("Creating a new session for %s\n", remote.String())
+        sess = session.New()
+        s.sessions[remote.String()] = sess
+    }
+
+    handlers.Handle(sess, buf)
 }
 
 func (s *Server) Serve() error {

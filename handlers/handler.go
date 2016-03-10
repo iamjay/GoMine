@@ -3,16 +3,17 @@ package handlers
 import (
     "encoding/hex"
     "log"
-    "net"
+
+    "bitbucket.org/pathompong/gomine/session"
 )
 
-type handleFunc func(remote *net.UDPAddr, buf []byte) error
+type handleFunc func(sess *session.Session, buf []byte) error
 
 var handlers = map[byte]handleFunc{}
 
-func Handle(remote *net.UDPAddr, buf []byte) error {
+func Handle(sess *session.Session, buf []byte) error {
     if handler, ok := handlers[buf[0]]; ok {
-        return handler(remote, buf)
+        return handler(sess, buf)
     }
 
     log.Printf("%x:\n%s\n", buf[0], hex.Dump(buf))
