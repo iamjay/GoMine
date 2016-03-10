@@ -1,10 +1,10 @@
 package handlers
 
 import (
-    "encoding/hex"
-    "log"
+	"encoding/hex"
+	"log"
 
-    "bitbucket.org/pathompong/gomine/session"
+	"bitbucket.org/pathompong/gomine/session"
 )
 
 type handleFunc func(sess *session.Session, buf []byte) error
@@ -12,17 +12,17 @@ type handleFunc func(sess *session.Session, buf []byte) error
 var handlers = map[byte]handleFunc{}
 
 func Handle(sess *session.Session, buf []byte) error {
-    if handler, ok := handlers[buf[0]]; ok {
-        return handler(sess, buf)
-    }
+	if handler, ok := handlers[buf[0]]; ok {
+		return handler(sess, buf)
+	}
 
-    log.Printf("%x:\n%s\n", buf[0], hex.Dump(buf))
+	log.Printf("%x:\n%s\n", buf[0], hex.Dump(buf))
 
-    return nil
+	return nil
 }
 
 func registerHandler(handlerFuncs map[byte]handleFunc) {
-    for k, v := range handlerFuncs {
-        handlers[k] = v
-    }
+	for k, v := range handlerFuncs {
+		handlers[k] = v
+	}
 }

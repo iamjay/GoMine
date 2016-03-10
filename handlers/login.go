@@ -1,22 +1,22 @@
 package handlers
 
 import (
-    "encoding/hex"
-    "log"
+	"encoding/hex"
+	"log"
 
-    "bitbucket.org/pathompong/gomine/session"
+	"bitbucket.org/pathompong/gomine/session"
 )
 
 var loginHandlers = map[byte]handleFunc{
-    0x01: login,
+	0x01: login,
 }
 
 func init() {
-    registerHandler(loginHandlers)
+	registerHandler(loginHandlers)
 }
 
 func login(sess *session.Session, buf []byte) error {
-    log.Printf("login:\n%s\n", hex.Dump(buf))
+	log.Printf("login:\n%s\n", hex.Dump(buf))
 
-    return nil
+	return nil
 }

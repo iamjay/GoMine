@@ -4,5 +4,5 @@ type Session struct {
 }
 
 func New() *Session {
-    return &Session{}
+	return &Session{}
 }
