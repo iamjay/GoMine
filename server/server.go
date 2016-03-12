@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"math/rand"
 	"net"
 
 	"bitbucket.org/pathompong/gomine/handlers"
@@ -9,6 +10,7 @@ import (
 )
 
 type Server struct {
+	serverId int64
 	conn     *net.UDPConn
 	exited   chan bool
 	sessions map[string]*session.Session
@@ -16,20 +18,33 @@ type Server struct {
 
 func New() *Server {
 	return &Server{
+		serverId: rand.Int63(),
 		exited:   make(chan bool),
 		sessions: make(map[string]*session.Session),
 	}
+}
+
+func (s *Server) ServerId() int64 {
+	return s.serverId
 }
 
 func (s *Server) processPacket(remote *net.UDPAddr, buf []byte) {
 	sess, ok := s.sessions[remote.String()]
 	if !ok {
 		log.Printf("Creating a new session for %s\n", remote.String())
-		sess = session.New()
+		sess = &session.Session{
+			Server: s,
+			Conn:   s.conn,
+			Remote: remote,
+		}
 		s.sessions[remote.String()] = sess
 	}
 
-	handlers.Handle(sess, buf)
+	err := handlers.Handle(sess, buf)
+	if err != nil {
+		log.Printf("Error processing packet for %s: %s\n",
+			remote.String(), err.Error())
+	}
 }
 
 func (s *Server) Serve() error {

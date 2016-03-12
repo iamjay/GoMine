@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"encoding/hex"
-	"log"
-
+	"bitbucket.org/pathompong/gomine/packets"
 	"bitbucket.org/pathompong/gomine/session"
 )
 
@@ -16,7 +14,16 @@ func init() {
 }
 
 func login(sess *session.Session, buf []byte) error {
-	log.Printf("login:\n%s\n", hex.Dump(buf))
+	var p packets.ConnectedPingOpenConnections
+	err := packets.UnmarshalPacket(buf, &p)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return sess.SendPacket(packets.UnconnectedPingOpenConnections{
+		PacketId:   packets.ID_UNCONNECTED_PING_OPEN_CONNECTIONS,
+		PingId:     p.PingId,
+		ServerId:   sess.Server.ServerId(),
+		Identifier: "MCPE;GoMine;2 7;0.14.0;0;20",
+	})
 }

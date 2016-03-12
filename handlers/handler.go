@@ -12,12 +12,14 @@ type handleFunc func(sess *session.Session, buf []byte) error
 var handlers = map[byte]handleFunc{}
 
 func Handle(sess *session.Session, buf []byte) error {
+	log.Printf("<<< %s\n%s\n", sess.Remote.String(), hex.Dump(buf))
+
 	if handler, ok := handlers[buf[0]]; ok {
 		return handler(sess, buf)
 	}
 
-	log.Printf("%x:\n%s\n", buf[0], hex.Dump(buf))
-
+	log.Printf("Unhandled packet from %s:\n%s\n", sess.Remote.String(),
+		hex.Dump(buf))
 	return nil
 }
 

@@ -1,4 +1,4 @@
-package packet
+package packets
 
 import (
 	"bytes"
@@ -29,26 +29,29 @@ func MarshalPacket(p interface{}) (data []byte, err error) {
 		f := s.Field(i)
 		switch f.Kind() {
 		case reflect.Int8:
-			binary.Write(&b, binary.LittleEndian, int8(f.Int()))
+			binary.Write(&b, binary.BigEndian, int8(f.Int()))
 		case reflect.Int16:
-			binary.Write(&b, binary.LittleEndian, int16(f.Int()))
+			binary.Write(&b, binary.BigEndian, int16(f.Int()))
 		case reflect.Int32:
-			binary.Write(&b, binary.LittleEndian, int32(f.Int()))
+			binary.Write(&b, binary.BigEndian, int32(f.Int()))
 		case reflect.Int64:
-			binary.Write(&b, binary.LittleEndian, int64(f.Int()))
+			binary.Write(&b, binary.BigEndian, int64(f.Int()))
 		case reflect.String:
 			str := f.String()
-			binary.Write(&b, binary.LittleEndian, int16(utf8.RuneCountInString(str)))
+			binary.Write(&b, binary.BigEndian,
+				int16(utf8.RuneCountInString(str)))
 			b.WriteString(str)
 		case reflect.Array:
 			e := f.Type().Elem()
 			if e.Kind() != reflect.Uint8 {
-				return nil, fmt.Errorf("invalid array type: %s", e.Kind())
+				return nil, fmt.Errorf("invalid array type: %s",
+					e.Kind())
 			}
 			if f.Type() == reflect.TypeOf(MagicValue) {
-				binary.Write(&b, binary.LittleEndian, MagicValue)
+				binary.Write(&b, binary.BigEndian, MagicValue)
 			} else {
-				binary.Write(&b, binary.LittleEndian, f.Interface().([]byte))
+				binary.Write(&b, binary.BigEndian,
+					f.Interface().([]byte))
 			}
 		}
 	}
@@ -71,32 +74,33 @@ func UnmarshalPacket(data []byte, p interface{}) error {
 		switch f.Kind() {
 		case reflect.Int8:
 			var i8 int8
-			binary.Read(b, binary.LittleEndian, &i8)
+			binary.Read(b, binary.BigEndian, &i8)
 			f.SetInt(int64(i8))
 		case reflect.Int16:
 			var i16 int16
-			binary.Read(b, binary.LittleEndian, &i16)
+			binary.Read(b, binary.BigEndian, &i16)
 			f.SetInt(int64(i16))
 		case reflect.Int32:
 			var i32 int32
-			binary.Read(b, binary.LittleEndian, &i32)
+			binary.Read(b, binary.BigEndian, &i32)
 			f.SetInt(int64(i32))
 		case reflect.Int64:
 			var i64 int64
-			binary.Read(b, binary.LittleEndian, &i64)
+			binary.Read(b, binary.BigEndian, &i64)
 			f.SetInt(i64)
 		case reflect.String:
 			var len int16
-			binary.Read(b, binary.LittleEndian, &len)
+			binary.Read(b, binary.BigEndian, &len)
 			buf := make([]byte, len)
-			binary.Read(b, binary.LittleEndian, buf)
+			binary.Read(b, binary.BigEndian, buf)
 			f.SetString(string(buf))
 		case reflect.Array:
 			e := f.Type().Elem()
 			if e.Kind() != reflect.Uint8 {
-				return fmt.Errorf("invalid array type: %s", e.Kind())
+				return fmt.Errorf("invalid array type: %s",
+					e.Kind())
 			}
-			binary.Read(b, binary.LittleEndian, f.Addr().Interface())
+			binary.Read(b, binary.BigEndian, f.Addr().Interface())
 		}
 	}
 
