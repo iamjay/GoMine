@@ -53,6 +53,14 @@ func MarshalPacket(p interface{}) (data []byte, err error) {
 				binary.Write(&b, binary.BigEndian,
 					f.Interface().([]byte))
 			}
+		case reflect.Slice:
+			e := f.Type().Elem()
+			if e.Kind() != reflect.Uint8 {
+				return nil, fmt.Errorf("invalid slice type: %s",
+					e.Kind())
+			}
+			binary.Write(&b, binary.BigEndian,
+				f.Interface().([]byte))
 		}
 	}
 
@@ -101,6 +109,15 @@ func UnmarshalPacket(data []byte, p interface{}) error {
 					e.Kind())
 			}
 			binary.Read(b, binary.BigEndian, f.Addr().Interface())
+		case reflect.Slice:
+			e := f.Type().Elem()
+			if e.Kind() != reflect.Uint8 {
+				return fmt.Errorf("invalid slice type: %s",
+					e.Kind())
+			}
+			buf := make([]byte, b.Len())
+			binary.Read(b, binary.BigEndian, buf)
+			f.SetBytes(buf)
 		}
 	}
 

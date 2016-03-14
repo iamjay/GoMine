@@ -6,7 +6,8 @@ import (
 )
 
 var loginHandlers = map[byte]handleFunc{
-	0x01: login,
+	packets.ID_CONNECTED_PING_OPEN_CONNECTIONS: login,
+	packets.ID_OPEN_CONNECTION_REQUEST_1: openConnRequest1,
 }
 
 func init() {
@@ -15,8 +16,7 @@ func init() {
 
 func login(sess *session.Session, buf []byte) error {
 	var p packets.ConnectedPingOpenConnections
-	err := packets.UnmarshalPacket(buf, &p)
-	if err != nil {
+	if err := packets.UnmarshalPacket(buf, &p); err != nil {
 		return err
 	}
 
@@ -26,4 +26,16 @@ func login(sess *session.Session, buf []byte) error {
 		ServerId:   sess.Server.ServerId(),
 		Identifier: "MCPE;GoMine;2 7;0.14.0;0;20",
 	})
+}
+
+function openConnRequest1(sess *session.Session, buf []byte) error {
+	var p packets.ID_OPEN_CONNECTION_REQUEST_1
+	if err := packets.UnmarshalPacket(buf, &p); err != nil {
+		return err
+	}
+
+	// TODO: Check the magic bytes.
+	return sess.SendPacket(packets.OpenConnectionReply1{
+		
+	});
 }
