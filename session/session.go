@@ -8,10 +8,21 @@ import (
 	"bitbucket.org/pathompong/gomine/packets"
 )
 
+type ConnectionState int
+
+const (
+	Unconnected ConnectionState = iota
+	OpenReply1
+	OpenReply2
+	Connected
+)
+
 type Session struct {
-	Server Server
-	Conn   *net.UDPConn
-	Remote *net.UDPAddr
+	Conn            *net.UDPConn
+	Remote          *net.UDPAddr
+	Server          Server
+	ConnectionState ConnectionState
+	ClientId        int64
 }
 
 func (s *Session) SendPacket(p interface{}) error {

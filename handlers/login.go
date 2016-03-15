@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"fmt"
+
 	"bitbucket.org/pathompong/gomine/packets"
 	"bitbucket.org/pathompong/gomine/session"
 )
 
 var loginHandlers = map[byte]handleFunc{
-	packets.ID_CONNECTED_PING_OPEN_CONNECTIONS: login,
-	packets.ID_OPEN_CONNECTION_REQUEST_1: openConnRequest1,
+	packets.ID_UNCONNECTED_PING_OPEN_CONNECTIONS: login,
+	packets.ID_OPEN_CONNECTION_REQUEST_1:         openConnRequest1,
+	packets.ID_OPEN_CONNECTION_REQUEST_2:         openConnRequest2,
 }
 
 func init() {
@@ -21,21 +24,53 @@ func login(sess *session.Session, buf []byte) error {
 	}
 
 	return sess.SendPacket(packets.UnconnectedPingOpenConnections{
-		PacketId:   packets.ID_UNCONNECTED_PING_OPEN_CONNECTIONS,
+		PacketId:   packets.ID_UNCONNECTED_PONG_OPEN_CONNECTIONS,
 		PingId:     p.PingId,
 		ServerId:   sess.Server.ServerId(),
 		Identifier: "MCPE;GoMine;2 7;0.14.0;0;20",
 	})
 }
 
-function openConnRequest1(sess *session.Session, buf []byte) error {
-	var p packets.ID_OPEN_CONNECTION_REQUEST_1
+func openConnRequest1(sess *session.Session, buf []byte) error {
+	var p packets.OpenConnectionRequest1
 	if err := packets.UnmarshalPacket(buf, &p); err != nil {
 		return err
 	}
 
+	if sess.ConnectionState > session.OpenReply1 {
+		// Reset this session.
+	}
+	sess.ConnectionState = session.OpenReply1
+
 	// TODO: Check the magic bytes.
 	return sess.SendPacket(packets.OpenConnectionReply1{
-		
-	});
+		PacketId: packets.ID_OPEN_CONNECTION_REPLY_1,
+		ServerId: sess.Server.ServerId(),
+		Security: 0,
+		MTUSize:  int16(len(p.Payload)),
+	})
+}
+
+func openConnRequest2(sess *session.Session, buf []byte) error {
+	var p packets.OpenConnectionRequest2
+	if err := packets.UnmarshalPacket(buf, &p); err != nil {
+		return err
+	}
+
+	if sess.ConnectionState != session.OpenReply1 {
+		return fmt.Errorf(
+			"invalid state for OpenConnectionRequest2: %v",
+			sess.ConnectionState)
+	}
+	sess.ConnectionState = session.OpenReply2
+
+	sess.ClientId = p.ClientId
+
+	return sess.SendPacket(packets.OpenConnectionReply2{
+		PacketId:      packets.ID_OPEN_CONNECTION_REPLY_2,
+		ServerId:      sess.Server.ServerId(),
+		ClientUDPPort: int16(sess.Remote.Port),
+		MTUSize:       p.MTUSize,
+		Security:      0,
+	})
 }
