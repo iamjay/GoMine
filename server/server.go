@@ -28,7 +28,7 @@ func (s *Server) ServerId() int64 {
 	return s.serverId
 }
 
-func (s *Server) processPacket(remote *net.UDPAddr, buf []byte) {
+func (s *Server) processPacket(remote *net.UDPAddr, data []byte) {
 	sess, ok := s.sessions[remote.String()]
 	if !ok {
 		log.Printf("Creating a new session for %s\n", remote.String())
@@ -40,7 +40,7 @@ func (s *Server) processPacket(remote *net.UDPAddr, buf []byte) {
 		s.sessions[remote.String()] = sess
 	}
 
-	err := handlers.Handle(sess, buf)
+	err := handlers.Handle(sess, data)
 	if err != nil {
 		log.Printf("Error processing packet for %s: %s\n",
 			remote.String(), err.Error())
@@ -64,12 +64,12 @@ func (s *Server) Serve() error {
 		defer s.conn.Close()
 
 		for {
-			buf := make([]byte, 1500)
-			byteCount, remoteAddr, err := s.conn.ReadFromUDP(buf)
+			data := make([]byte, 1500)
+			byteCount, remoteAddr, err := s.conn.ReadFromUDP(data)
 			if err != nil {
 				break
 			}
-			s.processPacket(remoteAddr, buf[0:byteCount])
+			s.processPacket(remoteAddr, data[0:byteCount])
 		}
 
 		s.exited <- true

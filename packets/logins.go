@@ -10,6 +10,10 @@ const (
 	ID_UNCONNECTED_PONG_OPEN_CONNECTIONS = 0x1C
 )
 
+const (
+	ID_CLIENT_CONNECT = 0x09
+)
+
 type ConnectedPingOpenConnections struct {
 	PacketId int8
 	PingId   int64
@@ -63,4 +67,11 @@ type UnconnectedPingOpenConnections struct {
 	ServerId   int64
 	Magic      Magic
 	Identifier string
+}
+
+type ClientConnect struct {
+	PacketId  int8
+	ClientId  int64
+	SessionId int64
+	Unknown   int8
 }

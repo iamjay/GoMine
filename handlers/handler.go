@@ -2,24 +2,29 @@ package handlers
 
 import (
 	"encoding/hex"
+	"fmt"
 	"log"
 
 	"bitbucket.org/pathompong/gomine/session"
 )
 
-type handleFunc func(sess *session.Session, buf []byte) error
+type handleFunc func(sess *session.Session, data []byte) error
 
 var handlers = map[byte]handleFunc{}
 
-func Handle(sess *session.Session, buf []byte) error {
-	log.Printf("<<< %s\n%s\n", sess.Remote.String(), hex.Dump(buf))
+func Handle(sess *session.Session, data []byte) error {
+	log.Printf("<<< %s\n%s\n", sess.Remote.String(), hex.Dump(data))
 
-	if handler, ok := handlers[buf[0]]; ok {
-		return handler(sess, buf)
+	if len(data) < 1 {
+		return fmt.Errorf("packet length is too short")
+	}
+
+	if handler, ok := handlers[data[0]]; ok {
+		return handler(sess, data)
 	}
 
 	log.Printf("Unhandled packet from %s:\n%s\n", sess.Remote.String(),
-		hex.Dump(buf))
+		hex.Dump(data))
 	return nil
 }
 
